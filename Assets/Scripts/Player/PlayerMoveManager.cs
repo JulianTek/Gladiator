@@ -41,12 +41,7 @@ public class PlayerMoveManager : MonoBehaviour
                 }
             }
         }
-        while (transform.position != endPosition) 
-        {
-            transform.position = Vector3.MoveTowards(transform.position, endPosition, speed);
-            // calling animator.SetBool("isWalking", true) will change an animation parameter called isWalking to true. When we implement animations this is all you need
-        }
-        // after exiting the while loop, set animator.SetBool("isWalking", false)
+        transform.position = Vector3.MoveTowards(transform.position, endPosition, speed * Time.deltaTime);
     }
 
 
