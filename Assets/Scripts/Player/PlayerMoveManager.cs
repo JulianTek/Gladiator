@@ -4,17 +4,27 @@ using UnityEngine;
 
 public class PlayerMoveManager : MonoBehaviour
 {
-    private float elapsedTime = 0;
-    private float duration = 10;
+    // SerializeField allows you to expose private objects to the inspector. HideInInspector is the opposite (hide public objects from the inspector)
+    [SerializeField]
+    private float speed;
+    // making endPosition a field so we don't have to "remake" them every frame
+    private Vector3 endPosition;
+
+    // I like to group fields by function, this is where I'd put all components
+    private Animator animator;
+
     // Start is called before the first frame update
     void Start()
     {
-
+        // prevent the player from moving to 0,0,0
+        endPosition = transform.position;
+        animator = GetComponent<Animator>();
     }
 
     // Update is called once per frame
     void Update()
     {
+
         if (Input.GetMouseButtonDown(0)) // 0 is for left mouse button
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -22,17 +32,22 @@ public class PlayerMoveManager : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit))
             {
-                Vector3 worldPosition = hit.point;
-                Vector3 startPosition = transform.position;
-                Debug.Log("World position " + worldPosition);
-
-                // Do something with the world position, e.g., instantiate a game object
-                // Instantiate(prefab, worldPosition, Quaternion.identity);
-                // duration of movement in seconds
-                elapsedTime += Time.deltaTime;
-                float t = duration / elapsedTime;
-                transform.position = Vector3.Lerp(startPosition, worldPosition, t);
+                // Compare tag isn't the most performant method to do this, but this will only set end position if you click on a floor. You have to set the tag of the objects in the inspector
+                // Ideally, you'd use "GetComponent<X>() where X = any component that only floor objects have, this is better for performance
+                if (hit.transform.gameObject.CompareTag("Floor"))
+                {
+                    endPosition = hit.point;
+                    Debug.Log(endPosition);
+                }
             }
         }
+        while (transform.position != endPosition) 
+        {
+            transform.position = Vector3.MoveTowards(transform.position, endPosition, speed);
+            // calling animator.SetBool("isWalking", true) will change an animation parameter called isWalking to true. When we implement animations this is all you need
+        }
+        // after exiting the while loop, set animator.SetBool("isWalking", false)
     }
+
+
 }
