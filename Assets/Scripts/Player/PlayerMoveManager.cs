@@ -10,15 +10,14 @@ public class PlayerMoveManager : MonoBehaviour
     // making endPosition a field so we don't have to "remake" them every frame
     private Vector3 endPosition;
 
-    // I like to group fields by function, this is where I'd put all components
-    private Animator animator;
+
+ 
 
     // Start is called before the first frame update
     void Start()
     {
         // prevent the player from moving to 0,0,0
         endPosition = transform.position;
-        animator = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -36,11 +35,14 @@ public class PlayerMoveManager : MonoBehaviour
                 // Ideally, you'd use "GetComponent<X>() where X = any component that only floor objects have, this is better for performance
                 if (hit.transform.gameObject.CompareTag("Floor"))
                 {
+                    EventChannels.playerEvents.OnPlayerMove?.Invoke(true);
                     endPosition = hit.point;
                     Debug.Log(endPosition);
                 }
             }
         }
+        if (Vector3.Distance(transform.position, endPosition) < .5f)
+            EventChannels.playerEvents.OnPlayerMove?.Invoke(false);
         transform.position = Vector3.MoveTowards(transform.position, endPosition, speed * Time.deltaTime);
     }
 
